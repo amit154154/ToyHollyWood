@@ -1,6 +1,6 @@
 # ToyHollyWood Image Genrating and clustering
 
-By scraping this [Toys Store site](https://www.toyhollywood.com/index.php) I created the [ToyHollyWood Dataset](https://www.kaggle.com/datasets/irotem98/toyhollywood) of 15,300 images of 27 difrrent classes of toys.
+By scraping this [Toys Store site](https://www.toyhollywood.com/index.php) I created the [ToyHollyWood Dataset](https://www.kaggle.com/datasets/irotem98/toyhollywood) of 15,300 images of 29 difrrent classes of toys.
 
 ![pop image](assets/pop_example.jpg) 
 ![transformer image](assets/transformer_example.jpg) 
