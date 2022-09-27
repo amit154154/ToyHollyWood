@@ -2,7 +2,7 @@
 
 By scraping this [Toys Store site](https://www.toyhollywood.com/index.php) I created the [ToyHollyWood Dataset](https://www.kaggle.com/datasets/irotem98/toyhollywood) of 15,300 images of 27 difrrent classes of toys.
 
-![pop image](assets/pop_example.jpg) 
+![pop image](assets/pop_example.jpg)
 ![transformer image](assets/transformer_example.jpg) 
 ![dc image](assets/dc_example.jpg) 
 ![HotToys image](assets/HotToys_example.jpg) 
@@ -32,6 +32,19 @@ clusters accuracy:
 
 
 ## image genration
+
+
+Using the cluster I created a dataset of only [humans pop toys](https://www.kaggle.com/datasets/irotem98/funkopop-humans) and used super resulation model, then tried some method to generate new pop toys.
+
+| model |FID  |
+--- | --- |
+[fast-gan](https://arxiv.org/abs/2101.04775) | 4.01
+[stylegan2](https://arxiv.org/abs/1912.04958) | TBD
+diffusion T=300 | TDB
+
+
+
+![fast-gan example](assets/fast_gan_example.png)
 
 
 

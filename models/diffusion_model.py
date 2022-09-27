@@ -10,7 +10,6 @@ class Block(nn.Module):
         super().__init__()
         self.time_mlp = nn.Linear(time_emb_dim, out_ch)
         if up:
-            self.conv1 = nn.Conv2d(2 * in_ch, out_ch, 3, padding=1)
             self.transform = nn.ConvTranspose2d(out_ch, out_ch, 4, 2, 1)
         else:
             self.conv1 = nn.Conv2d(in_ch, out_ch, 3, padding=1)
@@ -154,6 +153,71 @@ class diffusion_train(pl.LightningModule):
         self.lr = lr
         self.d = device
 
+    def linear_beta_schedule(self, timesteps, start=0.0001, end=0.02):
+        return torch.linspace(start, end, timesteps)
+
+    def get_index_from_list(self, vals, k, x_shape):
+        """
+        Retu\rns a specific index t of a passed list of values vals
+        while considering the batch dimension.
+        """
+        batch_size = k.shape[0]
+        out = vals.gather(-1, k.cpu())
+        return out.reshape(batch_size, *((1,) * (len(x_shape) - 1))).cuda()
+
+    @torch.no_grad()
+    def sample_timestep(self, x, k):
+        """
+        Calls the model to predict the noise in the image and returns
+        the denoised image.
+        Applies noise to this image, if we are not in the last step yet.
+        """
+        T = 300
+        betas = self.linear_beta_schedule(timesteps=T)
+        alphas = 1. - betas
+        alphas_cumprod = torch.cumprod(alphas, axis=0)
+        alphas_cumprod_prev = F.pad(alphas_cumprod[:-1], (1, 0), value=1.0)
+        sqrt_recip_alphas = torch.sqrt(1.0 / alphas)
+        sqrt_alphas_cumprod = torch.sqrt(alphas_cumprod)
+        sqrt_one_minus_alphas_cumprod = torch.sqrt(1. - alphas_cumprod)
+        posterior_variance = betas * (1. - alphas_cumprod_prev) / (1. - alphas_cumprod)
+
+        betas_t = self.get_index_from_list(betas, k, x.shape)
+        sqrt_one_minus_alphas_cumprod_t = self.get_index_from_list(
+            sqrt_one_minus_alphas_cumprod, k, x.shape
+        )
+        sqrt_recip_alphas_t = self.get_index_from_list(sqrt_recip_alphas, k, x.shape)
+
+        # Call model (current image - noise prediction)
+        model_mean = sqrt_recip_alphas_t.cuda() * (
+                x.cuda() - betas_t.cuda() * self.model(x, k).cuda() / sqrt_one_minus_alphas_cumprod_t.cuda()
+        )
+        posterior_variance_t = self.get_index_from_list(posterior_variance, k, x.shape)
+        if k == 0:
+            return model_mean
+        else:
+            noise = torch.randn_like(x).cuda()
+            return model_mean + torch.sqrt(posterior_variance_t).cuda() * noise
+
+    def random_image(self):
+        betas = self.linear_beta_schedule(timesteps=self.T)
+
+        alphas = 1. - betas
+        alphas_cumprod = torch.cumprod(alphas, axis=0)
+        alphas_cumprod_prev = F.pad(alphas_cumprod[:-1], (1, 0), value=1.0)
+        sqrt_recip_alphas = torch.sqrt(1.0 / alphas)
+        sqrt_alphas_cumprod = torch.sqrt(alphas_cumprod)
+        sqrt_one_minus_alphas_cumprod = torch.sqrt(1. - alphas_cumprod)
+        posterior_variance = betas * (1. - alphas_cumprod_prev) / (1. - alphas_cumprod)
+        # Sample noise
+        img_size = 80
+        img = torch.randn((3, 3, img_size, img_size), device='cuda')
+
+        for i in range(0, self.T)[::-1]:
+            r = torch.full((1,), i, device=self.d, dtype=torch.long)
+            img = self.sample_timestep(img.cuda(), r)
+        return [img[i].detach().cpu() for i in range(len(img))]
+
     def training_step(self, batch, count, **kwargs):
         images, _ = batch
         BATCH_SIZE = images.size()[0]
@@ -163,10 +227,12 @@ class diffusion_train(pl.LightningModule):
         l1_loss = F.l1_loss(noise, noise_pred)
         self.log('l1_loss', l1_loss)
         loss = l1_loss
+        with torch.no_grad():
+            if count % 50 == 0:
+                print('1')
+                images = self.random_image()
+                self.logger.log_image(key="samples", images=images)
 
-        if count % 50 == 0:
-            real = x_noisy
-            self.logger.log_image(key="samples", images=[noise[0:3], noise_pred[0:3]])
         return loss
 
     def validation_step(self, batch, count, **kwargs):
@@ -176,20 +242,31 @@ class diffusion_train(pl.LightningModule):
         x_noisy, noise = self.sample.forward_diffusion_sample(images, t, self.d)
         noise_pred = self.model(x_noisy, t)
         l1_loss = F.l1_loss(noise, noise_pred)
-        self.log('l1_loss_val', l1_loss)
+        # self.log('l1_loss_val', l1_loss)
         loss = l1_loss
 
         if count % 50 == 0:
             real = x_noisy
-            self.logger.log_image(key="samples_val", images=[noise[0:3], fake[0:3]])
+            # self.logger.log_image(key="samples_val", images=[noise[0:3], fake[0:3]])
+
         return loss
 
     def configure_optimizers(self):
-        optim_generators = torch.optim.Adam(
-            list(self.model.parameters()),
-            lr=self.lr
-        )
-        return optim_generators
+        optimizer = torch.optim.Adam(self.parameters(), lr=1e-4)
+        sch = torch.optim.lr_scheduler.StepLR(
+            optimizer, step_size=10, gamma=0.5)
+        # learning rate scheduler
+        return {
+            "optimizer": optimizer,
+            "lr_scheduler": {
+                "scheduler": sch,
+                "monitor": "l1_loss",
+
+            }
+        }
+
+
+
 
 
 
