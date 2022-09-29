@@ -39,13 +39,14 @@ Using the cluster I created a dataset of only [humans pop toys](https://www.kagg
 | model |FID  |
 --- | --- |
 [fast-gan](https://arxiv.org/abs/2101.04775) | 4.01
-[stylegan2](https://arxiv.org/abs/1912.04958) | TBD
+[stylegan2](https://arxiv.org/abs/1912.04958) | 2.15
 diffusion T=300 | TDB
 
-
-
+### fast-gan example
 ![fast-gan example](assets/fast_gan_example.png)
 
+### stylegan examples
+![fast-gan example](assets/stylegan2_example.png)
 
 
 
