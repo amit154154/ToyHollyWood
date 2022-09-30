@@ -46,7 +46,7 @@ diffusion T=300 | TDB
 ![fast-gan example](assets/fast_gan_example.png)
 
 ### stylegan examples
-![fast-gan example](assets/stylegan2_example.png)
+![fast-gan example](assets/grid_stylegan.jpeg)
 
 
 
