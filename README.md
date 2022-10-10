@@ -61,7 +61,9 @@ L_{mapper} = L_1(x,x') + L_1(E_{clip}(x),E_{clip}(x')) + L_1(E(x),E(x')) + L_{di
 
 when x is the original image,E is the self supervised encoder,D is the stylegan decoder and E_{clip} is the clip pretrained encoder, x' is the image when x' = D(E(x) + mapper(E(x))).
 
-|self supervised method | FID
---- | --- | ---
-|[SimCLR](https://arxiv.org/abs/2002.05709)|  0.9937
+
+| self supervised method | FID
+--- | --- |
+| [SimCLR](https://arxiv.org/abs/2002.05709)|  0.9937 |
+
 
