@@ -52,7 +52,7 @@ diffusion T=300 | TDB
 ### mapper
 using self supervised model to get the featchers of a pop image we can create a mapper from a pop image to create a new pop image simiiler using stylegan2 as a decoder.
 
-![style-gan grid](assets/mapper_diagram.png)
+![style-gan grid](assets/mapper_diagram.jpg)
 when blue models are frozen and the mapper is training. the loss function is:
 
 ```math
