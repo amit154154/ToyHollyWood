@@ -264,12 +264,3 @@ class diffusion_train(pl.LightningModule):
 
             }
         }
-
-
-
-
-
-
-
-
-
