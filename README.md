@@ -46,7 +46,22 @@ diffusion T=300 | TDB
 ![fast-gan example](assets/fast_gan_example.png)
 
 ### stylegan examples
-![fast-gan example](assets/grid_stylegan.jpeg)
+![style-gan grid](assets/grid_stylegan.jpeg)
 
 
+### mapper
+using self supervised model to get the featchers of a pop image we can create a mapper from a pop image to create a new pop image simiiler using stylegan2 as a decoder.
+
+![style-gan grid](assets/mapper_diagram.png)
+when blue models are frozen and the mapper is training. the loss function is:
+
+```math
+L_{mapper} = L_1(x,x') + L_1(E_{clip}(x),E_{clip}(x')) + L_1(E(x),E(x')) + L_{dists}(x,x')
+```
+
+when x is the original image,E is the self supervised encoder,D is the stylegan decoder and E_{clip} is the clip pretrained encoder, x' is the image when x' = D(E(x) + mapper(E(x))).
+
+|self supervised method | FID
+--- | --- | ---
+|[SimCLR](https://arxiv.org/abs/2002.05709)|  0.9937
 
