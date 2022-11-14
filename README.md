@@ -1,6 +1,6 @@
-# ToyHollyWood Image Genrating and clustering
+# ToyHollyWood -FunkoPop toys Image Genrating and clustering
 
-By scraping this [Toys Store site](https://www.toyhollywood.com/index.php) I created the [ToyHollyWood Dataset](https://www.kaggle.com/datasets/irotem98/toyhollywood) of 15,300 images of 27 difrrent classes of toys.
+By scraping this [Toys Store site](https://www.toyhollywood.com/index.php) I created the [ToyHollyWood Dataset](https://www.kaggle.com/datasets/irotem98/toyhollywood) of 15,300 images of 29 difrrent classes of toys.
 
 ![pop image](assets/pop_example.jpg)
 ![transformer image](assets/transformer_example.jpg) 
@@ -22,13 +22,13 @@ Models:
 
 clusters accuracy:
 
-|  | CLIP  | VAE-DISTS |VAE |  
---- | --- | ---| --- |
-[kmeans](https://en.wikipedia.org/wiki/K-means_clustering) | 0.239 | 0.247| 0.249
-[AgglomerativeClustering](https://en.wikipedia.org/wiki/Hierarchical_clustering) | 0.3 | 0.243| 0.282
-[Birch](https://medium.com/geekculture/balanced-iterative-reducing-and-clustering-using-hierarchies-birch-1428bb06bb38) | **0.316** | 0.269| 0.291
-[SpectralClustering](https://en.wikipedia.org/wiki/Spectral_clustering) | 0.251 | 0.251| 0.246
-[GaussianMixture](https://towardsdatascience.com/gaussian-mixture-models-for-clustering-3f62d0da675) | 0.25 | 0.225| 0.217 
+| Cluster algorithm                                                                                                               | CLIP  | VAE-DISTS |VAE |  
+------------------------------------------------------------------------------------------------------------------------| --- | ---| --- |
+ [kmeans](https://en.wikipedia.org/wiki/K-means_clustering)                                                             | 0.239 | 0.247| 0.249
+ [AgglomerativeClustering](https://en.wikipedia.org/wiki/Hierarchical_clustering)                                       | 0.3 | 0.243| 0.282
+ [Birch](https://medium.com/geekculture/balanced-iterative-reducing-and-clustering-using-hierarchies-birch-1428bb06bb38) | **0.316** | 0.269| 0.291
+ [SpectralClustering](https://en.wikipedia.org/wiki/Spectral_clustering)                                                | 0.251 | 0.251| 0.246
+ [GaussianMixture](https://towardsdatascience.com/gaussian-mixture-models-for-clustering-3f62d0da675)                   | 0.25 | 0.225| 0.217 
 
 
 ## image genration
@@ -50,20 +50,29 @@ diffusion T=300 | TDB
 
 
 ### mapper
-using self supervised model to get the featchers of a pop image we can create a mapper from a pop image to create a new pop image simiiler using stylegan2 as a decoder.
-
-![style-gan grid](assets/mapper_diagram.jpg)
-when blue models are frozen and the mapper is training. the loss function is:
-
-```math
-L_{mapper} = L_1(x,x') + L_1(E_{clip}(x),E_{clip}(x')) + L_1(E(x),E(x')) + L_{dists}(x,x')
-```
-
-when x is the original image,E is the self supervised encoder,D is the stylegan decoder and E_{clip} is the clip pretrained encoder, x' is the image when x' = D(E(x) + mapper(E(x))).
+with implemntation of the paper ["Bridging CLIP and StyleGAN through Latent Alignment for Image Editing"](https://arxiv.org/abs/2210.04506)
+we can create mapper from text to pop.the training is such:
+![Demonstration of the training process](assets/mapper_training.png)
 
 
-| self supervised method | FID
---- | --- |
-| [SimCLR](https://arxiv.org/abs/2002.05709)|  0.9937 |
+when we will use the w+ space not stylespace.
+
+here are some examples when the text input of every image is 
+
+'woman with {color} long hair'
+
+'man with {color} hair'
+
+'man with {color} hair and a beard'
+
+'woman with {color} dress'
+
+when color changes every row [yellow,white,orange,brown]
+
+![Demonstration of the training process](assets/mapper_grid.jpg)
+
+
+
+
 
 
